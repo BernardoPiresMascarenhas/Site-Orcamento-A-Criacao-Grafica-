@@ -35,7 +35,6 @@
 	<!-- / Yoast SEO plugin. -->
 
 
-
 <script>
 dataLayer = [{"title":"Servi\u00e7os","author":"wgraficacriacaoa","wordcount":472,"logged_in":"false","page_id":271,"post_date":"2022-11-23 10:23:04","post_type":"page"}];
 </script>
@@ -81,6 +80,7 @@ window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15
 :where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}
 :root :where(.wp-block-pullquote){font-size: 1.5em;line-height: 1.6;}
 </style>
+<link rel="stylesheet" href="orcamento.css">
 <link data-minify="1" rel="stylesheet" id="eef-frontend-style-css" href="./A Criação, impressão gráfica em BH_files/style.css" media="all">
 <link data-minify="1" rel="stylesheet" id="cute-alert-css" href="./A Criação, impressão gráfica em BH_files/style(1).css" media="all">
 <link data-minify="1" rel="stylesheet" id="text-editor-style-css" href="./A Criação, impressão gráfica em BH_files/text-editor.css" media="all">
@@ -317,7 +317,11 @@ promocionais ou corporativos.								</div>
                 	                
 					<h4 class="title"><a href="https://acriacao.com.br/servicos/#">Cardápios</a></h4>
 	                <div class="description">Exiba os seus melhores pratos em cardápios da melhor qualidade.</div>
-	                
+	                <div style="margin-top: 15px;">
+            			<button class="btn-orcamento" data-service="Cardápios" style="width: 100%; padding: 12px; font-size: 14px; background-color: #d72128; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                				Calcular Orçamento
+            			</button>
+						 </div>
 				</div>
             </div>				</div>
 				</div>
@@ -1215,5 +1219,191 @@ if(typeof mutation.addedNodes[i].getElementsByClassName!=='function'){continue}
 images=mutation.addedNodes[i].getElementsByTagName('img');is_image=mutation.addedNodes[i].tagName=="IMG";iframes=mutation.addedNodes[i].getElementsByTagName('iframe');is_iframe=mutation.addedNodes[i].tagName=="IFRAME";rocket_lazy=mutation.addedNodes[i].getElementsByClassName('rocket-lazyload');image_count+=images.length;iframe_count+=iframes.length;rocketlazy_count+=rocket_lazy.length;if(is_image){image_count+=1}
 if(is_iframe){iframe_count+=1}}});if(image_count>0||iframe_count>0||rocketlazy_count>0){lazyLoadInstance.update()}});var b=document.getElementsByTagName("body")[0];var config={childList:!0,subtree:!0};observer.observe(b,config)}},!1)</script><script data-no-minify="1" async="" src="./A Criação, impressão gráfica em BH_files/lazyload.min.js.download"></script>	<script>var rocket_lcp_data = {"ajax_url":"https:\/\/acriacao.com.br\/wp-admin\/admin-ajax.php","nonce":"45eb1f8e20","url":"https:\/\/acriacao.com.br\/servicos","is_mobile":false,"elements":"img, video, picture, p, main, div, li, svg","width_threshold":1600,"height_threshold":700,"debug":null}</script><script data-name="wpr-lcp-beacon" src="./A Criação, impressão gráfica em BH_files/lcp-beacon.min.js.download" async="" beacon-completed="true"></script>
 
+
+<div class="modal-overlay" id="orcamento-modal">
+    <div class="modal-content">
+        <span class="modal-close" id="modal-close-btn">&times;</span>
+        
+        <h2 id="modal-title">Orçamento para ...</h2>
+        
+        <div id="modal-form-container"></div>
+        
+        <div class="modal-resultado" id="modal-resultado">
+            <h4>Valor Estimado: R$ <span id="valor-final">0.00</span></h4>
+        </div>
+        
+        <a href="#" id="btn-whatsapp" class="btn-whatsapp" target="_blank">
+            Tenho Interesse (WhatsApp)
+        </a>
+    </div>
+</div>
+
+<script>
+	// --- INÍCIO DO CÓDIGO DO ORÇAMENTO ---
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Objeto com as informações de cada serviço
+    const servicesData = {
+        'Cartão de Visita': {
+            fields: [
+                { label: 'Quantidade', type: 'number', id: 'quantidade', defaultValue: 100 },
+                { label: 'Tipo de Papel', type: 'select', id: 'papel', options: [
+                    { text: 'Couchê 250g (Padrão)', value: 1.0 },
+                    { text: 'Couchê 300g (Mais Grosso)', value: 1.2 },
+                    { text: 'Reciclado 240g', value: 1.3 }
+                ]},
+                { label: 'Acabamento', type: 'select', id: 'acabamento', options: [
+                    { text: 'Sem Verniz', value: 1.0 },
+                    { text: 'Verniz Total Frente', value: 1.15 },
+                    { text: 'Laminação Fosca e Verniz Localizado', value: 1.4 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Cartão de Visita
+                // Exemplo: (quantidade / 100) * 50 * fator_papel * fator_acabamento
+                const basePrice = (values.quantidade / 100) * 50;
+                return basePrice * values.papel * values.acabamento;
+            }
+        },
+        'Banner': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+        // Adicione outros serviços aqui...
+		  'Cardápios': {
+        		fields: [
+            	{ label: 'Quantidade de Cardápios', type: 'number', id: 'quantidade', defaultValue: 10 },
+            	{ label: 'Número de Páginas', type: 'number', id: 'paginas', defaultValue: 4 },
+            	{ label: 'Tamanho', type: 'select', id: 'tamanho', options: [
+                	{ text: 'A4 (21 x 29.7 cm)', value: 1.0 },
+                	{ text: 'A5 (14.8 x 21 cm)', value: 0.6 }
+            	]},
+            	{ label: 'Acabamento', type: 'select', id: 'acabamento', options: [
+                	{ text: 'Simples (Folhas Soltas)', value: 1.0 },
+                	{ text: 'Com 1 Dobra', value: 1.1 },
+                	{ text: 'Encadernado Espiral', value: 1.5 }
+            	]}
+        ],
+        formula: function(values) {
+            const precoBasePorPagina = 2.50; 
+            return (precoBasePorPagina * values.paginas * values.acabamento) * values.quantidade * values.tamanho;
+        	}
+    	}
+    };
+
+    // Elementos do DOM (Modal)
+    const modal = document.getElementById('orcamento-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const formContainer = document.getElementById('modal-form-container');
+    const valorFinalSpan = document.getElementById('valor-final');
+    const btnWhatsapp = document.getElementById('btn-whatsapp');
+    const closeBtn = document.getElementById('modal-close-btn');
+
+    let currentServiceData = {};
+
+    // Função para abrir o modal e construir o formulário
+    function openModal(serviceName) {
+        currentServiceData = servicesData[serviceName];
+        if (!currentServiceData) return;
+
+        modalTitle.textContent = `Orçamento para ${serviceName}`;
+        
+        // Limpa o formulário antigo e constrói o novo
+        formContainer.innerHTML = '';
+        currentServiceData.fields.forEach(field => {
+            let fieldHtml = `<label for="${field.id}">${field.label}:</label>`;
+            if (field.type === 'select') {
+                fieldHtml += `<select id="${field.id}" class="form-input">`;
+                field.options.forEach(opt => {
+                    fieldHtml += `<option value="${opt.value}">${opt.text}</option>`;
+                });
+                fieldHtml += `</select>`;
+            } else {
+                fieldHtml += `<input type="${field.type}" id="${field.id}" value="${field.defaultValue || ''}" class="form-input">`;
+            }
+            formContainer.innerHTML += `<div style="margin-bottom: 15px;">${fieldHtml}</div>`;
+        });
+        
+        modal.classList.add('show');
+        calculatePrice(); // Calcula o preço inicial
+    }
+    
+    // Função para fechar o modal
+    function closeModal() {
+        modal.classList.remove('show');
+    }
+
+    // Função para calcular o preço
+    function calculatePrice() {
+        const values = {};
+        currentServiceData.fields.forEach(field => {
+            const input = document.getElementById(field.id);
+            values[field.id] = parseFloat(input.value) || 0;
+        });
+
+        const finalPrice = currentServiceData.formula(values);
+        valorFinalSpan.textContent = finalPrice.toFixed(2).replace('.', ',');
+        
+        updateWhatsappLink(finalPrice);
+    }
+
+    // Função para gerar o link do WhatsApp
+    function updateWhatsappLink(price) {
+        let message = `Olá! Tenho interesse em um orçamento para *${modalTitle.textContent.replace('Orçamento para ', '')}*.\n\n`;
+        message += "Detalhes:\n";
+        
+        currentServiceData.fields.forEach(field => {
+            const input = document.getElementById(field.id);
+            const label = document.querySelector(`label[for=${field.id}]`).textContent;
+            let valueText = input.value;
+            if (input.tagName === 'SELECT') {
+                valueText = input.options[input.selectedIndex].text;
+            }
+            message += `- ${label} ${valueText}\n`;
+        });
+
+        message += `\n*Valor Estimado: R$ ${price.toFixed(2).replace('.', ',')}*`;
+
+        const whatsappNumber = '553125552560'; 
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+        btnWhatsapp.href = whatsappUrl;
+    }
+
+
+    // Adicionar eventos
+    document.querySelectorAll('.btn-orcamento').forEach(button => {
+        button.addEventListener('click', () => {
+            const serviceName = button.dataset.service;
+            openModal(serviceName);
+        });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Recalcula o preço sempre que um campo do formulário mudar
+    formContainer.addEventListener('input', calculatePrice);
+
+});
+
+// --- FIM DO CÓDIGO DO ORÇAMENTO ---	
+
+</script>
 
 </body></html>
