@@ -20,7 +20,7 @@ Este projeto consiste na criação de um site para cálculo de orçamentos de pr
 
 ## ⚙️ Como Utilizar
 
-1.  **Acesse o site:** 
+1.  **Acesse o site:** https://acriacao.com.br/servicos/
 2.  **Escolha o Produto:** Selecione o tipo de serviço desejado (ex: Cartão de Visita, Banner, Adesivo).
 3.  **Personalize seu Pedido:** Defina as especificações como tamanho, tipo de papel, acabamento e quantidade.
 4.  **Veja o Orçamento:** O valor será calculado e exibido instantaneamente na tela.
