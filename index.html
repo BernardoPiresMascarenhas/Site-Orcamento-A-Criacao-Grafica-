@@ -1352,110 +1352,420 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         'Revistas': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
-        },
+    fields: [
+        { label: 'Quantidade de Revistas', type: 'number', id: 'quantidade', defaultValue: 100 },
+        { label: 'Número Total de Páginas (capa + miolo)', type: 'number', id: 'paginas', defaultValue: 16 },
+        { label: 'Tamanho da Revista (fechada)', type: 'select', id: 'tamanho', options: [
+            { text: 'A4 (21 x 29.7 cm)', value: 1.0 },
+            { text: 'A5 (14.8 x 21 cm)', value: 0.6 },
+            { text: 'Outro (sob consulta)', value: 1.2 }
+        ]},
+        { label: 'Papel da Capa', type: 'select', id: 'papelCapa', options: [
+            { text: 'Couchê Brilho 170g', value: 1.2 },
+            { text: 'Couchê Fosco 170g', value: 1.3 }
+        ]},
+        { label: 'Papel do Miolo (páginas internas)', type: 'select', id: 'papelMiolo', options: [
+            { text: 'Couchê Brilho 90g', value: 1.0 },
+            { text: 'Couchê Fosco 90g', value: 1.1 },
+            { text: 'Offset 75g', value: 0.9 }
+        ]},
+        { label: 'Cores da Impressão', type: 'select', id: 'impressao', options: [
+            { text: 'Colorida (Capa e Miolo)', value: 1.5 },
+            { text: 'Capa Colorida, Miolo Preto e Branco', value: 1.0 }
+        ]},
+        { label: 'Acabamento', type: 'select', id: 'acabamento', options: [
+            { text: 'Grampo Canoa (Padrão)', value: 1.0 },
+            { text: 'Lombada Quadrada (consultar)', value: 1.8 }
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA REVISTAS (EXEMPLO) ---
+
+        // 1. Defina seus custos base internos. Estes são os valores que VOCÊ vai ajustar.
+        const custoBaseImpressaoCapa = 0.75; // Um valor fixo para a impressão da capa.
+        const custoBaseImpressaoPaginaMiolo = 0.20; // Um valor para cada página do miolo.
+        const custoSetupMaquina = 75.00; // Custo fixo para preparar a impressão, diluído em grandes quantidades.
+
+        // 2. Validação: número de páginas deve ser múltiplo de 4 para grampo canoa.
+        if (values.paginas % 4 !== 0) {
+            // Você pode retornar um valor de erro ou um cálculo aproximado.
+            // Por enquanto, vamos apenas continuar.
+        }
+        const paginasMiolo = values.paginas > 4 ? values.paginas - 4 : 0; // O miolo são as páginas totais menos as 4 da capa.
+
+        // 3. Calcular o custo de material e impressão de UMA revista.
+        const custoCapaUnitario = custoBaseImpressaoCapa * values.papelCapa;
+        const custoMioloUnitario = paginasMiolo * custoBaseImpressaoPaginaMiolo * values.papelMiolo;
+        
+        // Custo total de uma revista, considerando tamanho, cores e acabamento.
+        let custoTotalUnitario = (custoCapaUnitario + custoMioloUnitario) * values.tamanho * values.impressao * values.acabamento;
+
+        // 4. Aplicar um desconto de escala. Quanto mais imprime, mais barato fica por unidade.
+        if (values.quantidade >= 250) {
+            custoTotalUnitario *= 0.90; // 10% de desconto por unidade
+        }
+        if (values.quantidade >= 1000) {
+            custoTotalUnitario *= 0.85; // Mais 15% de desconto por unidade
+        }
+
+        // 5. Calcular o preço final: Custo por unidade * quantidade + custo de preparação.
+        const precoFinal = (custoTotalUnitario * values.quantidade) + (custoSetupMaquina / values.quantidade);
+
+        return precoFinal;
+    }
+},
 		'Crachá': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
-        },
+    fields: [
+        { label: 'Quantidade de Crachás', type: 'number', id: 'quantidade', defaultValue: 10 },
+        { label: 'Tipo de Impressão', type: 'select', id: 'impressao', options: [
+            { text: 'Frente Colorida, Verso em Branco', value: 1.0 },
+            { text: 'Frente e Verso Coloridos', value: 1.5 }
+        ]},
+        { label: 'Furo para Cordão/Presilha', type: 'select', id: 'furo', options: [
+            { text: 'Sem Furo', value: 0 },
+            { text: 'Furo Ovóide (Padrão para Clip)', value: 0.25 },
+            { text: 'Furo Circular (para Cordão)', value: 0.25 }
+        ]},
+        { label: 'Nomes/Fotos Diferentes (Dados Variáveis)?', type: 'select', id: 'dadosVariaveis', options: [
+            { text: 'Não (Todos os crachás são iguais)', value: 1.0 },
+            { text: 'Sim (Cada crachá com um nome/foto)', value: 1.3 }
+        ]},
+        { label: 'Incluir Acessório?', type: 'select', id: 'acessorio', options: [
+            { text: 'Apenas o Crachá', value: 0 },
+            { text: 'Com Cordão Simples (Cor Única)', value: 2.50 },
+            { text: 'Com Presilha Retrátil (Roller Clip)', value: 4.00 }
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA CRACHÁS (EXEMPLO) ---
+
+        // 1. Defina seus custos base. AJUSTE ESTES VALORES.
+        // Custo para produzir 1 crachá de PVC simples (frente colorida, sem adicionais).
+        const precoBaseUnitario = 7.00; 
+        // Valor mínimo para justificar a preparação das máquinas.
+        const custoMinimoPedido = 50.00;
+
+        // 2. Calcular o custo do crachá em si, antes dos acessórios.
+        // Multiplicamos pelo fator de impressão (f/v é mais caro) e de dados variáveis (também encarece).
+        let custoDoCracha = precoBaseUnitario * values.impressao * values.dadosVariaveis;
+        
+        // 3. Adicionar custos fixos por item (o valor do furo e do acessório).
+        const custoDosAdicionais = values.furo + values.acessorio;
+        let custoTotalUnitario = custoDoCracha + custoDosAdicionais;
+
+        // 4. Aplicar desconto por quantidade (economia de escala). Essencial para este produto.
+        if (values.quantidade >= 20) {
+            custoTotalUnitario *= 0.85; // 15% de desconto por unidade
+        }
+        if (values.quantidade >= 50) {
+            custoTotalUnitario *= 0.75; // Desconto adicional, totalizando ~36%
+        }
+        if (values.quantidade >= 100) {
+            custoTotalUnitario *= 0.65; // Desconto adicional, totalizando ~52%
+        }
+        
+        // 5. Calcular o preço final e garantir que não seja menor que o pedido mínimo.
+        const precoFinal = custoTotalUnitario * values.quantidade;
+
+        return Math.max(precoFinal, custoMinimoPedido);
+    }
+},
 		'Livros': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
-        },
+    fields: [
+        { label: 'Quantidade de Livros', type: 'number', id: 'quantidade', defaultValue: 100 },
+        { label: 'Número de Páginas do Miolo', type: 'number', id: 'paginas', defaultValue: 150 },
+        { label: 'Tamanho do Livro (fechado)', type: 'select', id: 'tamanho', options: [
+            { text: '14 x 21 cm (Padrão)', value: 1.0 },
+            { text: '16 x 23 cm', value: 1.2 },
+            { text: '21 x 28 cm', value: 1.8 }
+        ]},
+        { label: 'Papel da Capa', type: 'select', id: 'papelCapa', options: [
+            { text: 'Cartão Supremo 250g', value: 1.0 },
+            { text: 'Cartão Triplex 300g', value: 1.25 }
+        ]},
+        { label: 'Acabamento da Capa', type: 'select', id: 'acabamentoCapa', options: [
+            { text: 'Laminação Fosca', value: 1.1 },
+            { text: 'Laminação Brilhante', value: 1.0 }
+        ]},
+        { label: 'Papel do Miolo (Páginas internas)', type: 'select', id: 'papelMiolo', options: [
+            { text: 'Pólen Soft 80g (Amarelado)', value: 1.2 },
+            { text: 'Offset 75g (Branco)', value: 1.0 },
+            { text: 'Couchê Fosco 90g', value: 1.1 }
+        ]},
+        { label: 'Cores do Miolo', type: 'select', id: 'impressaoMiolo', options: [
+            { text: 'Preto e Branco (1/1)', value: 1.0 },
+            { text: 'Colorido (4/4)', value: 3.5 }
+        ]},
+        { label: 'Tipo de Encadernação', type: 'select', id: 'encadernacao', options: [
+            { text: 'Brochura (Lombada Quadrada)', value: 1.0 },
+            { text: 'Capa Dura (Hardcover)', value: 2.5 }
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA LIVROS (EXEMPLO) ---
+        // 1. Defina seus custos base internos para ajuste.
+        const custoBaseCapa = 4.50; // Custo para produzir a capa (impressão + material base).
+        const custoBasePorPagina = 0.08; // Custo por página do miolo (preto e branco).
+        const custoFixoEncadernacao = 3.50; // Custo base da encadernação brochura.
+        const custoSetup = 250.00; // Custo de preparação de maquinário e arquivos.
+
+        // 2. Calcular custo da capa e do miolo separadamente para UMA unidade.
+        const custoCapa = custoBaseCapa * values.papelCapa * values.acabamentoCapa;
+        const custoMiolo = (values.paginas * custoBasePorPagina) * values.papelMiolo * values.impressaoMiolo;
+        
+        // 3. Somar os custos e aplicar fatores de tamanho e tipo de encadernação.
+        let custoTotalUnitario = (custoCapa + custoMiolo + custoFixoEncadernacao) * values.tamanho * values.encadernacao;
+
+        // 4. Aplicar desconto de escala para grandes quantidades.
+        if (values.quantidade >= 250) {
+            custoTotalUnitario *= 0.90; // 10% de desconto por unidade
+        }
+        if (values.quantidade >= 500) {
+            custoTotalUnitario *= 0.85; // +15% de desconto
+        }
+        if (values.quantidade >= 1000) {
+            custoTotalUnitario *= 0.80; // +20% de desconto
+        }
+
+        // 5. Calcular o preço final e diluir o custo de setup na quantidade.
+        const precoFinal = (custoTotalUnitario * values.quantidade) + custoSetup;
+
+        return precoFinal;
+    }
+},
 		'Cadernos': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
-        },
+    fields: [
+        { label: 'Quantidade de Cadernos', type: 'number', id: 'quantidade', defaultValue: 50 },
+        { label: 'Tamanho do Caderno', type: 'select', id: 'tamanho', options: [
+            { text: 'Universitário (20 x 27.5 cm)', value: 1.2 },
+            { text: 'A5 (14.8 x 21 cm)', value: 1.0 },
+            { text: 'Colegial (17 x 24 cm)', value: 1.1 }
+        ]},
+        { label: 'Número de Folhas', type: 'select', id: 'folhas', options: [
+            { text: '50 Folhas (100 páginas)', value: 50 },
+            { text: '96 Folhas (192 páginas)', value: 96 },
+            { text: '150 Folhas (300 páginas)', value: 150 }
+        ]},
+        { label: 'Miolo (Páginas internas)', type: 'select', id: 'miolo', options: [
+            { text: 'Pautado (com linhas)', value: 1.0 },
+            { text: 'Sem Pauta (em branco)', value: 1.0 },
+            { text: 'Pontilhado', value: 1.05 },
+            { text: 'Quadriculado', value: 1.05 }
+        ]},
+        { label: 'Acabamento da Capa Dura', type: 'select', id: 'acabamentoCapa', options: [
+            { text: 'Laminação Fosca', value: 1.1 },
+            { text: 'Laminação Brilhante', value: 1.0 }
+        ]},
+        { label: 'Itens Adicionais', type: 'select', id: 'adicionais', options: [
+            { text: 'Nenhum', value: 0 },
+            { text: 'Bolso Interno de Papel', value: 1.50 },
+            { text: 'Elástico para Fechamento', value: 1.20 },
+            { text: 'Bolso + Elástico', value: 2.70 }
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA CADERNOS (EXEMPLO) ---
+        // 1. Defina seus custos base internos para ajuste.
+        const custoBaseCapaDura = 6.50;      // Custo para produzir a capa dura (impressão + material).
+        const custoBasePorFolha = 0.09;       // Custo por folha do miolo.
+        const custoBaseWireO = 3.00;        // Custo base da encadernação wire-o.
+        const custoMinimoPedido = 250.00;   // Valor mínimo para justificar a produção.
+
+        // 2. Calcular o custo de UMA unidade, somando as partes.
+        const custoCapa = custoBaseCapaDura * values.acabamentoCapa;
+        const custoMiolo = (values.folhas * custoBasePorFolha) * values.miolo;
+        // O custo do wire-o pode aumentar um pouco com mais folhas.
+        const custoEncadernacao = custoBaseWireO * (1 + (values.folhas / 200)); 
+        
+        // Custo total de um caderno, considerando o tamanho e os adicionais.
+        let custoTotalUnitario = (custoCapa + custoMiolo + custoEncadernacao + values.adicionais) * values.tamanho;
+
+        // 3. Aplicar desconto de escala para grandes quantidades.
+        if (values.quantidade >= 100) {
+            custoTotalUnitario *= 0.90; // 10% de desconto por unidade
+        }
+        if (values.quantidade >= 300) {
+            custoTotalUnitario *= 0.85; // +15% de desconto
+        }
+        if (values.quantidade >= 500) {
+            custoTotalUnitario *= 0.80; // +20% de desconto
+        }
+
+        // 4. Calcular o preço final e garantir o valor mínimo do pedido.
+        const precoFinal = custoTotalUnitario * values.quantidade;
+
+        return Math.max(precoFinal, custoMinimoPedido);
+    }
+},
 		'Placa de Sinalização': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
-        },
+    fields: [
+        { label: 'Largura (em cm)', type: 'number', id: 'largura', defaultValue: 50 },
+        { label: 'Altura (em cm)', type: 'number', id: 'altura', defaultValue: 30 },
+        { label: 'Material da Placa', type: 'select', id: 'material', options: [
+            // O 'value' aqui é o preço por METRO QUADRADO de cada material.
+            { text: 'PS (Poliestireno) 1mm', value: 90 },
+            { text: 'PS (Poliestireno) 2mm', value: 120 },
+            { text: 'PVC Expandido 2mm', value: 150 },
+            { text: 'PVC Expandido 5mm', value: 220 },
+            { text: 'ACM 3mm (Alumínio Composto)', value: 350 }
+        ]},
+        { label: 'Tipo de Impressão', type: 'select', id: 'impressao', options: [
+            { text: 'Adesivo Vinil Aplicado na Placa', value: 1.0 },
+            { text: 'Impressão UV Direta na Placa', value: 1.25 }
+        ]},
+        { label: 'Acabamento e Fixação', type: 'select', id: 'acabamento', options: [
+            { text: 'Nenhum (Placa "crua")', value: 0 },
+            { text: '4 Furos (um em cada canto)', value: 5.00 },
+            { text: 'Fita Dupla Face no Verso', value: 15.00 }
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA PLACAS (EXEMPLO) ---
+
+        // 1. Defina seus custos base internos para ajuste.
+        const custoMinimoPlaca = 45.00; // Valor mínimo para qualquer placa, não importa o tamanho.
+
+        // 2. Converter as medidas de CM para Metros para calcular a área.
+        const larguraEmMetros = values.largura / 100;
+        const alturaEmMetros = values.altura / 100;
+        const area = larguraEmMetros * alturaEmMetros;
+
+        // 3. Calcular o preço base da placa (Área * Preço do m² do material).
+        //    O 'values.material' já contém o preço por m² que definimos nas opções.
+        const precoMaterial = area * values.material;
+
+        // 4. Aplicar o fator do tipo de impressão (Impressão UV é mais cara).
+        const precoComImpressao = precoMaterial * values.impressao;
+        
+        // 5. Adicionar o custo fixo do acabamento (furos ou dupla-face).
+        const precoFinal = precoComImpressao + values.acabamento;
+
+        // 6. Garantir que o preço final não seja menor que o custo mínimo.
+        //    Isso evita que uma placa muito pequena custe centavos.
+        return Math.max(precoFinal, custoMinimoPlaca);
+    }
+},
 		'Tags': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
-        },
+    fields: [
+        { label: 'Quantidade de Tags', type: 'select', id: 'quantidade', options: [
+            { text: '100 unidades', value: 100 },
+            { text: '250 unidades', value: 250 },
+            { text: '500 unidades', value: 500 },
+            { text: '1000 unidades (milheiro)', value: 1000 }
+        ]},
+        { label: 'Tamanho da Tag', type: 'select', id: 'tamanho', options: [
+            { text: 'Pequeno (aprox. 5x5 cm)', value: 0.9 },
+            { text: 'Médio (aprox. 9x5 cm)', value: 1.0 },
+            { text: 'Grande (aprox. 7x10 cm)', value: 1.2 }
+        ]},
+        { label: 'Papel', type: 'select', id: 'papel', options: [
+            { text: 'Couchê Fosco 250g', value: 1.0 },
+            { text: 'Couchê Brilho 300g', value: 1.1 },
+            { text: 'Kraft 240g', value: 1.3 }
+        ]},
+        { label: 'Cores de Impressão', type: 'select', id: 'impressao', options: [
+            { text: 'Frente Colorida, Verso em Branco (4x0)', value: 1.0 },
+            { text: 'Frente e Verso Coloridos (4x4)', value: 1.4 }
+        ]},
+        { label: 'Acabamento Especial', type: 'select', id: 'acabamento', options: [
+            { text: 'Nenhum', value: 0 },
+            { text: 'Laminação Fosca (Bopp)', value: 0.15 },
+            { text: 'Verniz Total Brilho', value: 0.10 },
+            { text: 'Verniz Localizado', value: 0.25 }
+        ]},
+        { label: 'Formato do Corte', type: 'select', id: 'corte', options: [
+            { text: 'Retangular (com furo padrão)', value: 0 },
+            { text: 'Corte Especial (Personalizado)', value: 80.00 }
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA TAGS (EXEMPLO) ---
+
+        // 1. Defina o custo base para produzir UMA tag simples, que será a referência.
+        const precoBaseUnidade = 0.50; // Custo de referência para 1 tag média, couchê 250g, 4x0.
+
+        // 2. Calcular o custo da tag individual com base nas escolhas de material e impressão.
+        let custoUnitario = precoBaseUnidade * values.tamanho * values.papel * values.impressao;
+
+        // 3. Adicionar o custo do acabamento especial (que é um valor fixo por unidade).
+        custoUnitario += values.acabamento;
+
+        // 4. Calcular o preço do lote, aplicando um FATOR de desconto progressivo.
+        //    Isso simula o "preço de milheiro", onde o valor unitário cai drasticamente com a quantidade.
+        let fatorDescontoQuantidade = 1.0; // Fator para 100 unidades
+        if (values.quantidade >= 250) fatorDescontoQuantidade = 0.8;  // 20% de desconto no preço final do lote
+        if (values.quantidade >= 500) fatorDescontoQuantidade = 0.6;  // 40% de desconto
+        if (values.quantidade >= 1000) fatorDescontoQuantidade = 0.4; // 60% de desconto
+
+        let precoLote = (custoUnitario * values.quantidade) * fatorDescontoQuantidade;
+
+        // 5. Adicionar o custo do corte especial, se selecionado.
+        //    Este é um custo fixo do lote, pois exige a criação de uma "faca" de corte.
+        precoLote += values.corte;
+        
+        // 6. Garantir um valor mínimo para o pedido.
+        const pedidoMinimo = 60.00;
+
+        return Math.max(precoLote, pedidoMinimo);
+    }
+},
 		'Panfletos': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
-        },
+    fields: [
+        { label: 'Quantidade', type: 'select', id: 'quantidade', options: [
+            { text: '1000 unidades', value: 1000 },
+            { text: '2500 unidades', value: 2500 },
+            { text: '5000 unidades', value: 5000 },
+            { text: '10000 unidades', value: 10000 }
+        ]},
+        { label: 'Tamanho', type: 'select', id: 'tamanho', options: [
+            { text: 'A6 (10 x 15 cm)', value: 1.0 },
+            { text: 'A5 (15 x 21 cm)', value: 1.9 },
+            { text: 'A4 (21 x 30 cm)', value: 3.8 }
+        ]},
+        { label: 'Papel', type: 'select', id: 'papel', options: [
+            { text: 'Couchê Brilho 90g (Mais Fino)', value: 0.95 },
+            { text: 'Couchê Brilho 115g (Padrão)', value: 1.0 },
+            { text: 'Couchê Fosco 115g', value: 1.05 },
+            { text: 'Offset 90g', value: 0.90 }
+        ]},
+        { label: 'Cores de Impressão', type: 'select', id: 'impressao', options: [
+            { text: 'Frente Colorida (4x0)', value: 1.0 },
+            { text: 'Frente e Verso Coloridos (4x4)', value: 1.25 }
+        ]},
+        { label: 'Acabamento Adicional', type: 'select', id: 'acabamento', options: [
+            { text: 'Refile (Corte Reto Padrão)', value: 0 },
+            { text: '1 Dobra Central', value: 0.01 }, // Custo extra de 1 centavo por unidade
+            { text: 'Verniz Total Brilho (Frente)', value: 0.03 } // Custo extra de 3 centavos por unidade
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA PANFLETOS (EXEMPLO) ---
+
+        // 1. Defina o preço base para o milheiro (1000 unidades) do panfleto mais simples.
+        // Ex: 1000 panfletos, 10x15cm, Couchê 115g Brilho, 4x0 (só frente), sem acabamento.
+        const precoBaseMilheiro = 150.00; 
+
+        // 2. Ajustar o preço do milheiro com base nas escolhas de tamanho, papel e impressão.
+        const precoMilheiroAjustado = precoBaseMilheiro * values.tamanho * values.papel * values.impressao;
+
+        // 3. Definir fatores de preço para diferentes quantidades (aqui está a mágica do preço de gráfica).
+        //    O preço não é linear. 2500 não custa 2.5x mais que 1000, por exemplo.
+        let fatorQuantidade = 1.0; // para 1000 unidades
+        if (values.quantidade === 2500) fatorQuantidade = 1.8; // 2500 custa 1.8x o preço de 1000
+        if (values.quantidade === 5000) fatorQuantidade = 3.0; // 5000 custa 3.0x o preço de 1000
+        if (values.quantidade === 10000) fatorQuantidade = 5.5; // 10000 custa 5.5x o preço de 1000
+
+        // 4. Calcular o preço do lote de panfletos (sem o acabamento ainda).
+        const precoLote = precoMilheiroAjustado * fatorQuantidade;
+
+        // 5. Adicionar o custo do acabamento (que é um custo por unidade * quantidade total).
+        const custoAcabamento = values.acabamento * values.quantidade;
+
+        const precoFinal = precoLote + custoAcabamento;
+
+        return precoFinal;
+    }
+},
 		'Banner': {
             fields: [
                 { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
@@ -1472,35 +1782,98 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
 		'Adesivo Vinil': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
-        },
+    fields: [
+        { label: 'Largura (em cm)', type: 'number', id: 'largura', defaultValue: 100 },
+        { label: 'Altura (em cm)', type: 'number', id: 'altura', defaultValue: 50 },
+        { label: 'Tipo de Vinil', type: 'select', id: 'vinil', options: [
+            // O 'value' aqui é o preço por METRO QUADRADO de cada material.
+            { text: 'Vinil Branco Brilho (Padrão)', value: 70.00 },
+            { text: 'Vinil Branco Fosco', value: 75.00 },
+            { text: 'Vinil Transparente', value: 85.00 },
+            { text: 'Vinil Jateado', value: 95.00 }
+        ]},
+        { label: 'Laminação Protetora (Aumenta a Durabilidade)', type: 'select', id: 'laminacao', options: [
+            // O 'value' é o custo ADICIONAL por m² para laminar.
+            { text: 'Nenhuma', value: 0 },
+            { text: 'Laminação Brilhante', value: 25.00 },
+            { text: 'Laminação Fosca', value: 30.00 }
+        ]},
+        { label: 'Tipo de Corte', type: 'select', id: 'corte', options: [
+            // O 'value' é um multiplicador sobre o preço final.
+            { text: 'Reto / Retangular', value: 1.0 },
+            { text: 'Corte de Contorno (Formato Especial)', value: 1.3 }
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA ADESIVO VINIL (EXEMPLO) ---
+
+        // 1. Defina seus custos base internos para ajuste.
+        const custoMinimoPedido = 40.00; // Valor mínimo para qualquer pedido de adesivo.
+
+        // 2. Converter as medidas de CM para Metros para calcular a área.
+        const larguraEmMetros = values.largura / 100;
+        const alturaEmMetros = values.altura / 100;
+        const area = larguraEmMetros * alturaEmMetros;
+
+        // 3. Calcular o preço base (Área * Preço do m² do vinil) e adicionar o custo da laminação.
+        const precoBase = area * values.vinil;
+        const custoLaminacao = area * values.laminacao;
+        const precoBruto = precoBase + custoLaminacao;
+
+        // 4. Aplicar o fator do tipo de corte (corte de contorno é mais caro).
+        const precoComCorte = precoBruto * values.corte;
+        
+        // 5. Garantir que o preço final não seja menor que o custo mínimo.
+        //    Isso evita que um adesivo muito pequeno custe centavos.
+        return Math.max(precoComCorte, custoMinimoPedido);
+    }
+},
 		'Envelopamento': {
-            fields: [
-                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
-                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
-                { label: 'Material', type: 'select', id: 'material', options: [
-                    { text: 'Lona Fosca (Padrão)', value: 80 },
-                    { text: 'Lona Brilhante', value: 85 }
-                ]}
-            ],
-            formula: function(values) {
-                // Lógica de preço para Banner
-                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
-                return values.largura * values.altura * values.material;
-            }
+    fields: [
+        { label: 'O que será envelopado?', type: 'select', id: 'objeto', options: [
+            // O 'value' aqui é um PREÇO BASE para cada serviço, já considerando um tamanho e trabalho médios.
+            { text: 'Superfície Plana (ex: parede, balcão) - Preço por m²', value: 120.00 },
+            { text: 'Geladeira (Apenas a Porta)', value: 250.00 },
+            { text: 'Geladeira (Completa)', value: 550.00 },
+            { text: 'Veículo - Teto', value: 450.00 },
+            { text: 'Veículo - Capô', value: 400.00 },
+            { text: 'Moto (Básica - Tanque e Rabeta)', value: 600.00 }
+        ]},
+        { label: 'Medida (em m²) - Apenas para Superfícies Planas', type: 'number', id: 'area', defaultValue: 1 },
+        { label: 'Tipo de Vinil / Acabamento', type: 'select', id: 'vinil', options: [
+            { text: 'Cores Sólidas (Brilho ou Fosco)', value: 1.0 },
+            { text: 'Texturizado (Fibra de Carbono, Aço Escovado, etc)', value: 1.4 },
+            { text: 'Com Impressão Personalizada (Arte do Cliente)', value: 1.2 }
+        ]},
+        { label: 'Remoção de Adesivo Antigo?', type: 'select', id: 'remocao', options: [
+            { text: 'Não, a superfície está limpa', value: 0 },
+            { text: 'Sim, precisa remover o material antigo', value: 150.00 }
+        ]}
+    ],
+    formula: function(values) {
+        // --- LÓGICA DE PREÇO PARA ENVELOPAMENTO (EXEMPLO) ---
+
+        // 1. O 'values.objeto' já nos dá um preço base para a maioria dos serviços.
+        let precoBaseDoServico = values.objeto;
+
+        // 2. Caso especial: Se for "Superfície Plana", o cálculo é por metro quadrado.
+        //    O 'value' de "Superfície Plana" é o preço do m².
+        if (precoBaseDoServico === 120.00) { // Checando se é a opção de superfície plana
+            precoBaseDoServico = values.area * precoBaseDoServico;
         }
+
+        // 3. Aplicar o multiplicador do tipo de vinil. Texturizados ou com impressão são mais caros.
+        const precoComVinil = precoBaseDoServico * values.vinil;
+
+        // 4. Adicionar o custo fixo da remoção do material antigo, se necessário.
+        const precoFinal = precoComVinil + values.remocao;
+
+        // 5. Garantir um valor mínimo para o serviço.
+        const servicoMinimo = 150.00;
+
+        return Math.max(precoFinal, servicoMinimo);
+    }
+}
         // Adicione outros serviços aqui...
     };
 
