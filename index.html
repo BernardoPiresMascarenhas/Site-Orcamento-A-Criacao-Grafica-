@@ -470,7 +470,7 @@ promocionais ou corporativos.								</div>
 					<h4 class="title"><a href="https://acriacao.com.br/servicos/#">Placas de sinalização</a></h4>
 	                <div class="description">Nossas placas atendem diversos tipos de necessidades.</div>
 	                <div style="margin-top: 15px;">
-            			<button class="btn-orcamento" data-service="Placa de Sinaliação" style="width: 100%; padding: 12px; font-size: 14px; background-color: #d72128; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            			<button class="btn-orcamento" data-service="Placa de Sinalização" style="width: 100%; padding: 12px; font-size: 14px; background-color: #d72128; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
                 				Calcular Orçamento
             			</button>
 					</div>
@@ -518,7 +518,7 @@ promocionais ou corporativos.								</div>
 					<h4 class="title"><a href="https://acriacao.com.br/servicos/#">Panfletos</a></h4>
 	                <div class="description">Panfletos de alta qualidade com o melhor preço de BH.</div>
 	                <div style="margin-top: 15px;">
-            			<button class="btn-orcamento" data-service="Planfetos" style="width: 100%; padding: 12px; font-size: 14px; background-color: #d72128; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            			<button class="btn-orcamento" data-service="Panfletos" style="width: 100%; padding: 12px; font-size: 14px; background-color: #d72128; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
                 			Calcular Orçamento
             			</button>
 					</div>
@@ -1311,6 +1311,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Objeto com as informações de cada serviço
     const servicesData = {
+		'Cardápios': {
+			  fields: [
+			  { label: 'Quantidade de Cardápios', type: 'number', id: 'quantidade', defaultValue: 10 },
+			  { label: 'Número de Páginas', type: 'number', id: 'paginas', defaultValue: 4 },
+			  { label: 'Tamanho', type: 'select', id: 'tamanho', options: [
+				  { text: 'A4 (21 x 29.7 cm)', value: 1.0 },
+				  { text: 'A5 (14.8 x 21 cm)', value: 0.6 }
+			  ]},
+			  { label: 'Acabamento', type: 'select', id: 'acabamento', options: [
+				  { text: 'Simples (Folhas Soltas)', value: 1.0 },
+				  { text: 'Com 1 Dobra', value: 1.1 },
+				  { text: 'Encadernado Espiral', value: 1.5 }
+			  ]}
+	  ],
+	  formula: function(values) {
+		  const precoBasePorPagina = 2.50; 
+		  return (precoBasePorPagina * values.paginas * values.acabamento) * values.quantidade * values.tamanho;
+		  }
+	  },
         'Cartão de Visita': {
             fields: [
                 { label: 'Quantidade', type: 'number', id: 'quantidade', defaultValue: 100 },
@@ -1332,7 +1351,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return basePrice * values.papel * values.acabamento;
             }
         },
-        'Banner': {
+        'Revistas': {
             fields: [
                 { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
                 { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
@@ -1347,26 +1366,142 @@ document.addEventListener('DOMContentLoaded', function() {
                 return values.largura * values.altura * values.material;
             }
         },
+		'Crachá': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+		'Livros': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+		'Cadernos': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+		'Placa de Sinalização': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+		'Tags': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+		'Panfletos': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+		'Banner': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+		'Adesivo Vinil': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        },
+		'Envelopamento': {
+            fields: [
+                { label: 'Largura (em metros)', type: 'number', id: 'largura', defaultValue: 0.8 },
+                { label: 'Altura (em metros)', type: 'number', id: 'altura', defaultValue: 1.2 },
+                { label: 'Material', type: 'select', id: 'material', options: [
+                    { text: 'Lona Fosca (Padrão)', value: 80 },
+                    { text: 'Lona Brilhante', value: 85 }
+                ]}
+            ],
+            formula: function(values) {
+                // Lógica de preço para Banner
+                // Exemplo: largura * altura * preco_do_metro_quadrado_do_material
+                return values.largura * values.altura * values.material;
+            }
+        }
         // Adicione outros serviços aqui...
-		  'Cardápios': {
-        		fields: [
-            	{ label: 'Quantidade de Cardápios', type: 'number', id: 'quantidade', defaultValue: 10 },
-            	{ label: 'Número de Páginas', type: 'number', id: 'paginas', defaultValue: 4 },
-            	{ label: 'Tamanho', type: 'select', id: 'tamanho', options: [
-                	{ text: 'A4 (21 x 29.7 cm)', value: 1.0 },
-                	{ text: 'A5 (14.8 x 21 cm)', value: 0.6 }
-            	]},
-            	{ label: 'Acabamento', type: 'select', id: 'acabamento', options: [
-                	{ text: 'Simples (Folhas Soltas)', value: 1.0 },
-                	{ text: 'Com 1 Dobra', value: 1.1 },
-                	{ text: 'Encadernado Espiral', value: 1.5 }
-            	]}
-        ],
-        formula: function(values) {
-            const precoBasePorPagina = 2.50; 
-            return (precoBasePorPagina * values.paginas * values.acabamento) * values.quantidade * values.tamanho;
-        	}
-    	}
     };
 
     // Elementos do DOM (Modal)
